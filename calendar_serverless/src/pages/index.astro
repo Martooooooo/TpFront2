@@ -1,0 +1,353 @@
+---
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Calendario</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="nav">
+        <button id="prev">&#8592;</button>
+        <span id="month-label"></span>
+        <button id="next">&#8594;</button>
+      </div>
+      <div class="weekdays">
+        <div class="weekday">Dom</div><div class="weekday">Lun</div><div class="weekday">Mar</div>
+        <div class="weekday">Mié</div><div class="weekday">Jue</div><div class="weekday">Vie</div>
+        <div class="weekday">Sáb</div>
+      </div>
+      <div class="calendar" id="calendar"></div>
+    </div>
+
+    <div class="modal-bg" id="modal">
+      <div class="modal">
+        <h2 id="modal-title"></h2>
+        <div class="tasks-list" id="tasks-list"></div>
+        <input type="text" id="task-input" placeholder="Nueva tarea..." />
+        <div class="modal-actions">
+          <button id="cancel-btn">Cancelar</button>
+          <button id="save-btn">Agregar</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, sans-serif;
+    background: #f5f5f3;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .nav button {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .nav button:hover { background: #e9e9e7; }
+  .nav span {
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 180px;
+    text-align: center;
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  .weekday {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 0;
+  }
+
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+
+  .day {
+    background: #fff;
+    border: 1px solid #e5e5e3;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 64px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .day:hover {
+    border-color: #aaa;
+    background: #f9f9f7;
+    transform: translateY(-2px);
+  }
+  .day.empty {
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+    pointer-events: none;
+  }
+  .day.today .day-num {
+    background: #3B6D11;
+    color: #EAF3DE;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .day-num {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .task-pill {
+    font-size: 10px;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 4px;
+    padding: 2px 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 300px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .modal h2 { font-size: 16px; font-weight: 500; }
+  .tasks-list { max-height: 100px; overflow-y: auto; }
+  .task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding: 4px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .task-item button {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .modal input {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+    width: 100%;
+    outline: none;
+  }
+  .modal input:focus { border-color: #888; }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .modal-actions button {
+    border: 1px solid #ddd;
+    background: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .modal-actions button:hover { background: #f0f0ee; }
+  #save-btn {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
+  }
+</style>
+
+<script>
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  let events: Record<string, string[]> = {};
+  const today = new Date();
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+  let selectedKey: string | null = null;
+
+  const calEl = document.getElementById('calendar')!;
+  const modalEl = document.getElementById('modal')!;
+  const taskInput = document.getElementById('task-input') as HTMLInputElement;
+
+  function getKey(y: number, m: number, d: number) {
+    return `${y}-${m}-${d}`;
+  }
+
+  function render() {
+    document.getElementById('month-label')!.textContent =
+      `${MONTHS[viewMonth]} ${viewYear}`;
+    calEl.innerHTML = '';
+
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'day empty';
+      calEl.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const div = document.createElement('div');
+      div.className = 'day';
+      const isToday = d === today.getDate()
+        && viewMonth === today.getMonth()
+        && viewYear === today.getFullYear();
+      if (isToday) div.classList.add('today');
+
+      const numEl = document.createElement('div');
+      numEl.className = 'day-num';
+      numEl.textContent = String(d);
+      div.appendChild(numEl);
+
+      const key = getKey(viewYear, viewMonth, d);
+      (events[key] ?? []).slice(0, 2).forEach(t => {
+        const pill = document.createElement('div');
+        pill.className = 'task-pill';
+        pill.textContent = t;
+        div.appendChild(pill);
+      });
+      if ((events[key] ?? []).length > 2) {
+        const more = document.createElement('div');
+        more.style.cssText = 'font-size:10px;color:#888;';
+        more.textContent = `+${events[key].length - 2} más`;
+        div.appendChild(more);
+      }
+
+      div.addEventListener('click', () => openModal(viewYear, viewMonth, d));
+      calEl.appendChild(div);
+    }
+  }
+
+  function openModal(y: number, m: number, d: number) {
+    selectedKey = getKey(y, m, d);
+    document.getElementById('modal-title')!.textContent =
+      `${d} de ${MONTHS[m]} ${y}`;
+    taskInput.value = '';
+    renderTasksList();
+    modalEl.classList.add('open');
+    setTimeout(() => taskInput.focus(), 50);
+  }
+
+  function renderTasksList() {
+    const list = document.getElementById('tasks-list')!;
+    list.innerHTML = '';
+    (events[selectedKey!] ?? []).forEach((t, i) => {
+      const item = document.createElement('div');
+      item.className = 'task-item';
+      item.innerHTML = `<span>${t}</span><button data-i="${i}">✕</button>`;
+      item.querySelector('button')!.addEventListener('click', () => {
+        events[selectedKey!].splice(i, 1);
+        renderTasksList();
+        render();
+        modalEl.classList.add('open');
+      });
+      list.appendChild(item);
+    });
+  }
+
+  document.getElementById('save-btn')!.addEventListener('click', () => {
+    const val = taskInput.value.trim();
+    if (!val || !selectedKey) return;
+    if (!events[selectedKey]) events[selectedKey] = [];
+    events[selectedKey].push(val);
+    taskInput.value = '';
+    renderTasksList();
+    render();
+    modalEl.classList.add('open');
+  });
+
+  taskInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('save-btn')!.click();
+  });
+
+  document.getElementById('cancel-btn')!.addEventListener('click', () => {
+    modalEl.classList.remove('open');
+    selectedKey = null;
+  });
+
+  modalEl.addEventListener('click', e => {
+    if (e.target === modalEl) modalEl.classList.remove('open');
+  });
+
+  document.getElementById('prev')!.addEventListener('click', () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    render();
+  });
+  document.getElementById('next')!.addEventListener('click', () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    render();
+  });
+
+  render();
+</script>
