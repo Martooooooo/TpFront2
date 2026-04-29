@@ -10,19 +10,48 @@
     <title>Calendario</title>
   </head>
   <body>
-    <div class="wrapper">
-      <div class="nav">
-        <button id="prev">&#8592;</button>
-        <span id="month-label"></span>
-        <button id="next">&#8594;</button>
-      </div>
-      <div class="weekdays">
-        <div class="weekday">Dom</div><div class="weekday">Lun</div><div class="weekday">Mar</div>
-        <div class="weekday">Mié</div><div class="weekday">Jue</div><div class="weekday">Vie</div>
-        <div class="weekday">Sáb</div>
-      </div>
-      <div class="calendar" id="calendar"></div>
-    </div>
+    <main class="layout">
+      <section class="login-card" id="login-panel">
+        <h1>Ingresar</h1>
+        <p class="login-sub">Accede para gestionar tus tareas del calendario.</p>
+
+        <form id="login-form" class="login-form" autocomplete="off">
+          <label>
+            Usuario
+            <input type="text" id="username" placeholder="Ej: admin" required />
+          </label>
+
+          <label>
+            Clave
+            <input type="password" id="password" placeholder="Tu clave" required />
+          </label>
+
+          <p class="login-error" id="login-error" aria-live="polite"></p>
+          <button type="submit" class="login-btn">Entrar</button>
+        </form>
+
+        <p class="login-hint">Demo: usuario <strong>admin</strong> y clave <strong>1234</strong>.</p>
+      </section>
+
+      <section class="wrapper hidden" id="calendar-app">
+        <div class="topbar">
+          <span id="welcome-user"></span>
+          <button id="logout">Cerrar sesion</button>
+        </div>
+
+        <div class="nav">
+          <button id="prev">&#8592;</button>
+          <span id="month-label"></span>
+          <button id="next">&#8594;</button>
+        </div>
+        <div class="weekdays">
+          <div class="weekday">Dom</div><div class="weekday">Lun</div><div class="weekday">Mar</div>
+          <div class="weekday">Mie</div><div class="weekday">Jue</div><div class="weekday">Vie</div>
+          <div class="weekday">Sab</div>
+        </div>
+        <div class="calendar" id="calendar"></div>
+      </section>
+    </main>
 
     <div class="modal-bg" id="modal">
       <div class="modal">
@@ -32,7 +61,7 @@
         <div class="modal-actions">
           <button id="cancel-btn">Cancelar</button>
           <button id="save-btn">Agregar</button>
-        </div>
+      </div>
       </div>
     </div>
   </body>
@@ -47,8 +76,87 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     padding: 2rem 1rem;
+  }
+
+  .layout {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hidden { display: none !important; }
+
+  .login-card {
+    width: 100%;
+    max-width: 380px;
+    background: #ffffff;
+    border: 1px solid #e2e2df;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  .login-card h1 {
+    font-size: 1.35rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .login-sub {
+    color: #555;
+    margin-bottom: 1.1rem;
+    font-size: 0.95rem;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .login-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+  .login-form input {
+    border: 1px solid #d9d9d6;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.95rem;
+    outline: none;
+  }
+
+  .login-form input:focus {
+    border-color: #3b6d11;
+    box-shadow: 0 0 0 2px rgba(59, 109, 17, 0.14);
+  }
+
+  .login-btn {
+    border: none;
+    background: #3b6d11;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .login-error {
+    min-height: 1rem;
+    font-size: 0.86rem;
+    color: #a22;
+  }
+
+  .login-hint {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #666;
   }
 
   .wrapper {
@@ -57,6 +165,29 @@
     align-items: center;
     width: 100%;
     max-width: 560px;
+  }
+
+  .topbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+  }
+
+  #welcome-user {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  #logout {
+    border: 1px solid #d8d8d6;
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    cursor: pointer;
   }
 
   .nav {
@@ -224,6 +355,56 @@
 </style>
 
 <script>
+  const AUTH_KEY = 'calendar_user';
+  const VALID_USER = 'admin';
+  const VALID_PASS = '1234';
+
+  const loginPanel = document.getElementById('login-panel') as HTMLElement;
+  const calendarApp = document.getElementById('calendar-app') as HTMLElement;
+  const loginForm = document.getElementById('login-form') as HTMLFormElement;
+  const loginError = document.getElementById('login-error') as HTMLElement;
+  const userInput = document.getElementById('username') as HTMLInputElement;
+  const passInput = document.getElementById('password') as HTMLInputElement;
+  const welcomeUser = document.getElementById('welcome-user') as HTMLElement;
+  const logoutBtn = document.getElementById('logout') as HTMLButtonElement;
+
+  function getLoggedUser() {
+    return localStorage.getItem(AUTH_KEY);
+  }
+
+  function showLogin() {
+    loginPanel.classList.remove('hidden');
+    calendarApp.classList.add('hidden');
+    loginError.textContent = '';
+  }
+
+  function showCalendar(username: string) {
+    loginPanel.classList.add('hidden');
+    calendarApp.classList.remove('hidden');
+    welcomeUser.textContent = `Sesion iniciada: ${username}`;
+    render();
+  }
+
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const user = userInput.value.trim();
+    const pass = passInput.value;
+
+    if (user === VALID_USER && pass === VALID_PASS) {
+      localStorage.setItem(AUTH_KEY, user);
+      passInput.value = '';
+      showCalendar(user);
+      return;
+    }
+
+    loginError.textContent = 'Usuario o clave incorrectos.';
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(AUTH_KEY);
+    showLogin();
+  });
+
   const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -233,8 +414,8 @@
   let viewMonth = today.getMonth();
   let selectedKey: string | null = null;
 
-  const calEl = document.getElementById('calendar')!;
-  const modalEl = document.getElementById('modal')!;
+  const calEl = document.getElementById('calendar') as HTMLElement;
+  const modalEl = document.getElementById('modal') as HTMLElement;
   const taskInput = document.getElementById('task-input') as HTMLInputElement;
 
   function getKey(y: number, m: number, d: number) {
@@ -242,6 +423,7 @@
   }
 
   function render() {
+    if (!calEl) return;
     document.getElementById('month-label')!.textContent =
       `${MONTHS[viewMonth]} ${viewYear}`;
     calEl.innerHTML = '';
@@ -349,5 +531,10 @@
     render();
   });
 
-  render();
+  const loggedUser = getLoggedUser();
+  if (loggedUser) {
+    showCalendar(loggedUser);
+  } else {
+    showLogin();
+  }
 </script>
