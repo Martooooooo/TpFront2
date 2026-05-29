@@ -1,6 +1,5 @@
 ---
 ---
-
 <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -10,58 +9,55 @@
     <title>Calendario</title>
   </head>
   <body>
-    <main class="layout">
-      <section class="login-card" id="login-panel">
-        <h1>Ingresar</h1>
-        <p class="login-sub">Accede para gestionar tus tareas del calendario.</p>
-
-        <form id="login-form" class="login-form" autocomplete="off">
-          <label>
-            Usuario
-            <input type="text" id="username" placeholder="Ej: admin" required />
-          </label>
-
-          <label>
-            Clave
-            <input type="password" id="password" placeholder="Tu clave" required />
-          </label>
-
-          <p class="login-error" id="login-error" aria-live="polite"></p>
-          <button type="submit" class="login-btn">Entrar</button>
-        </form>
-
-        <p class="login-hint">Demo: usuario <strong>admin</strong> y clave <strong>1234</strong>.</p>
-      </section>
-
-      <section class="wrapper hidden" id="calendar-app">
-        <div class="topbar">
-          <span id="welcome-user"></span>
-          <button id="logout">Cerrar sesion</button>
-        </div>
-
+    <div class="app">
+      <div class="cal-side">
         <div class="nav">
           <button id="prev">&#8592;</button>
-          <span id="month-label"></span>
+          <span id="mlabel"></span>
           <button id="next">&#8594;</button>
         </div>
         <div class="weekdays">
-          <div class="weekday">Dom</div><div class="weekday">Lun</div><div class="weekday">Mar</div>
-          <div class="weekday">Mie</div><div class="weekday">Jue</div><div class="weekday">Vie</div>
-          <div class="weekday">Sab</div>
+          <div class="wday">Dom</div><div class="wday">Lun</div><div class="wday">Mar</div>
+          <div class="wday">Mié</div><div class="wday">Jue</div><div class="wday">Vie</div>
+          <div class="wday">Sáb</div>
         </div>
-        <div class="calendar" id="calendar"></div>
-      </section>
-    </main>
-
-    <div class="modal-bg" id="modal">
-      <div class="modal">
-        <h2 id="modal-title"></h2>
-        <div class="tasks-list" id="tasks-list"></div>
-        <input type="text" id="task-input" placeholder="Nueva tarea..." />
-        <div class="modal-actions">
-          <button id="cancel-btn">Cancelar</button>
-          <button id="save-btn">Agregar</button>
+        <div class="calendar" id="cal"></div>
       </div>
+
+      <div class="panel">
+        <div class="panel-title">Nuevo evento</div>
+        <div class="sel-label" id="sel-label">Hacé clic en un día para seleccionarlo</div>
+
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" id="f-name" placeholder="Nombre del evento" />
+        </div>
+        <div class="field">
+          <label>Categoría</label>
+          <select id="f-cat">
+            <option value="trabajo">Trabajo</option>
+            <option value="escuela">Escuela</option>
+            <option value="personal">Personal</option>
+            <option value="entretenimiento">Entretenimiento</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Color</label>
+          <div class="colors" id="color-picker"></div>
+        </div>
+        <div class="field">
+          <label>Horario</label>
+          <div class="time-row">
+            <input type="time" id="f-start" />
+            <input type="time" id="f-end" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Descripción</label>
+          <textarea id="f-desc" placeholder="Detalles del evento..."></textarea>
+        </div>
+        <button id="add-btn">+ Agregar evento</button>
+        <div class="events-list" id="events-list"></div>
       </div>
     </div>
   </body>
@@ -74,467 +70,244 @@
     font-family: system-ui, sans-serif;
     background: #f5f5f3;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 2rem 1rem;
   }
 
-  .layout {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    align-items: start;
   }
 
-  .hidden { display: none !important; }
-
-  .login-card {
-    width: 100%;
-    max-width: 380px;
-    background: #ffffff;
-    border: 1px solid #e2e2df;
-    border-radius: 14px;
-    padding: 1.5rem;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-  }
-
-  .login-card h1 {
-    font-size: 1.35rem;
-    margin-bottom: 0.35rem;
-  }
-
-  .login-sub {
-    color: #555;
-    margin-bottom: 1.1rem;
-    font-size: 0.95rem;
-  }
-
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-
-  .login-form label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    font-size: 0.9rem;
-    color: #333;
-  }
-
-  .login-form input {
-    border: 1px solid #d9d9d6;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 0.95rem;
-    outline: none;
-  }
-
-  .login-form input:focus {
-    border-color: #3b6d11;
-    box-shadow: 0 0 0 2px rgba(59, 109, 17, 0.14);
-  }
-
-  .login-btn {
-    border: none;
-    background: #3b6d11;
-    color: #fff;
-    border-radius: 8px;
-    padding: 10px 12px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
-  .login-error {
-    min-height: 1rem;
-    font-size: 0.86rem;
-    color: #a22;
-  }
-
-  .login-hint {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: #666;
-  }
-
-  .wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 560px;
-  }
-
-  .topbar {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    gap: 1rem;
-  }
-
-  #welcome-user {
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  #logout {
-    border: 1px solid #d8d8d6;
-    background: #fff;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.82rem;
-    cursor: pointer;
-  }
-
-  .nav {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
+  /* — nav — */
+  .nav { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
   .nav button {
-    background: none;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.15s;
+    background: none; border: 1px solid #ccc; border-radius: 8px;
+    padding: 5px 14px; font-size: 13px; cursor: pointer; transition: background .15s;
   }
   .nav button:hover { background: #e9e9e7; }
-  .nav span {
-    font-size: 16px;
-    font-weight: 500;
-    min-width: 180px;
-    text-align: center;
-  }
+  .nav span { font-size: 15px; font-weight: 500; flex: 1; text-align: center; }
 
-  .weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-    width: 100%;
-    margin-bottom: 6px;
-  }
-  .weekday {
-    text-align: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 4px 0;
-  }
+  /* — weekdays — */
+  .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+  .wday { text-align: center; font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .05em; padding: 3px 0; }
 
-  .calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-    width: 100%;
-  }
-
+  /* — calendar grid — */
+  .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .day {
-    background: #fff;
-    border: 1px solid #e5e5e3;
-    border-radius: 8px;
-    padding: 8px;
-    min-height: 64px;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, transform 0.1s;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    background: #fff; border: 1px solid #e5e5e3; border-radius: 8px;
+    padding: 6px 5px; min-height: 58px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 2px;
+    transition: border-color .15s, background .15s, transform .1s;
   }
-  .day:hover {
-    border-color: #aaa;
-    background: #f9f9f7;
-    transform: translateY(-2px);
+  .day:hover { border-color: #aaa; background: #f9f9f7; transform: translateY(-1px); }
+  .day.empty { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+  .day.selected { outline: 2px solid #185FA5; outline-offset: -1px; }
+  .day.today .dnum {
+    background: #3B6D11; color: #EAF3DE;
+    border-radius: 50%; width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center; font-size: 11px;
   }
-  .day.empty {
-    background: transparent;
-    border-color: transparent;
-    cursor: default;
-    pointer-events: none;
-  }
-  .day.today .day-num {
-    background: #3B6D11;
-    color: #EAF3DE;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-  }
-  .day-num {
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .task-pill {
-    font-size: 10px;
-    background: #dbeafe;
-    color: #1e40af;
-    border-radius: 4px;
-    padding: 2px 5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .dnum { font-size: 12px; font-weight: 500; }
+
+  /* — event pills in calendar — */
+  .epill {
+    font-size: 9px; border-radius: 3px; padding: 1px 4px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: #fff; font-weight: 500;
   }
 
-  .modal-bg {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
+  /* — panel — */
+  .panel {
+    background: #fff; border: 1px solid #e5e5e3; border-radius: 12px;
+    padding: 1rem; position: sticky; top: 1.5rem;
   }
-  .modal-bg.open { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    width: 300px;
-    max-width: 90vw;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  .panel-title { font-size: 14px; font-weight: 500; margin-bottom: .75rem; }
+  .sel-label {
+    font-size: 11px; color: #666; margin-bottom: .6rem;
+    padding: .35rem .5rem; background: #f5f5f3; border-radius: 6px;
   }
-  .modal h2 { font-size: 16px; font-weight: 500; }
-  .tasks-list { max-height: 100px; overflow-y: auto; }
-  .task-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    padding: 4px 0;
-    border-bottom: 1px solid #eee;
+
+  /* — form fields — */
+  .field { margin-bottom: .6rem; }
+  .field label {
+    display: block; font-size: 10px; font-weight: 600; color: #888;
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px;
   }
-  .task-item button {
-    background: none;
-    border: none;
-    color: #aaa;
-    cursor: pointer;
-    font-size: 14px;
+  .field input, .field select, .field textarea {
+    width: 100%; border: 1px solid #ddd; border-radius: 8px;
+    padding: 7px 9px; font-size: 13px; background: #fafaf8;
+    outline: none; font-family: inherit; transition: border-color .15s;
   }
-  .modal input {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 14px;
-    width: 100%;
-    outline: none;
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #888; background: #fff;
   }
-  .modal input:focus { border-color: #888; }
-  .modal-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+  .field textarea { resize: vertical; min-height: 60px; line-height: 1.4; }
+  .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  /* — color swatches — */
+  .colors { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 3px; }
+  .cswatch {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform .1s;
   }
-  .modal-actions button {
-    border: 1px solid #ddd;
-    background: none;
-    border-radius: 8px;
-    padding: 6px 16px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.15s;
+  .cswatch:hover { transform: scale(1.15); }
+  .cswatch.sel { border-color: #333; }
+
+  /* — add button — */
+  #add-btn {
+    width: 100%; margin-top: .5rem; background: #dbeafe; color: #1e40af;
+    border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s;
   }
-  .modal-actions button:hover { background: #f0f0ee; }
-  #save-btn {
-    background: #dbeafe;
-    color: #1e40af;
-    border-color: #bfdbfe;
+  #add-btn:hover { opacity: .85; }
+
+  /* — events list in panel — */
+  .events-list {
+    margin-top: .75rem; border-top: 1px solid #eee; padding-top: .75rem;
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .ecard { border-radius: 8px; padding: 6px 8px; position: relative; }
+  .ecard-name { font-size: 12px; font-weight: 500; color: #fff; }
+  .ecard-meta { font-size: 10px; color: rgba(255,255,255,.8); margin-top: 2px; }
+  .ecard-del {
+    position: absolute; top: 4px; right: 6px;
+    background: none; border: none; color: rgba(255,255,255,.7);
+    cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
+  }
+  .ecard-del:hover { color: #fff; }
+  .no-events { font-size: 12px; color: #888; text-align: center; padding: .5rem 0; }
+
+  @media (max-width: 640px) {
+    .app { grid-template-columns: 1fr; }
+    .panel { position: static; }
   }
 </style>
 
 <script>
-  const AUTH_KEY = 'calendar_user';
-  const VALID_USER = 'admin';
-  const VALID_PASS = '1234';
-
-  const loginPanel = document.getElementById('login-panel') as HTMLElement;
-  const calendarApp = document.getElementById('calendar-app') as HTMLElement;
-  const loginForm = document.getElementById('login-form') as HTMLFormElement;
-  const loginError = document.getElementById('login-error') as HTMLElement;
-  const userInput = document.getElementById('username') as HTMLInputElement;
-  const passInput = document.getElementById('password') as HTMLInputElement;
-  const welcomeUser = document.getElementById('welcome-user') as HTMLElement;
-  const logoutBtn = document.getElementById('logout') as HTMLButtonElement;
-
-  function getLoggedUser() {
-    return localStorage.getItem(AUTH_KEY);
-  }
-
-  function showLogin() {
-    loginPanel.classList.remove('hidden');
-    calendarApp.classList.add('hidden');
-    loginError.textContent = '';
-  }
-
-  function showCalendar(username: string) {
-    loginPanel.classList.add('hidden');
-    calendarApp.classList.remove('hidden');
-    welcomeUser.textContent = `Sesion iniciada: ${username}`;
-    render();
-  }
-
-  loginForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const user = userInput.value.trim();
-    const pass = passInput.value;
-
-    if (user === VALID_USER && pass === VALID_PASS) {
-      localStorage.setItem(AUTH_KEY, user);
-      passInput.value = '';
-      showCalendar(user);
-      return;
-    }
-
-    loginError.textContent = 'Usuario o clave incorrectos.';
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem(AUTH_KEY);
-    showLogin();
-  });
-
   const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const COLORS = ['#E24B4A','#D85A30','#BA7517','#639922',
+    '#1D9E75','#185FA5','#7F77DD','#D4537E','#888780'];
 
-  let events: Record<string, string[]> = {};
+  interface Event {
+    name: string; category: string; color: string;
+    start: string; end: string; desc: string;
+  }
+
   const today = new Date();
-  let viewYear = today.getFullYear();
-  let viewMonth = today.getMonth();
-  let selectedKey: string | null = null;
+  let vy = today.getFullYear(), vm = today.getMonth();
+  let events: Record<string, Event[]> = {};
+  let selKey: string | null = null;
+  let selColor = COLORS[5];
 
-  const calEl = document.getElementById('calendar') as HTMLElement;
-  const modalEl = document.getElementById('modal') as HTMLElement;
-  const taskInput = document.getElementById('task-input') as HTMLInputElement;
+  const calEl = document.getElementById('cal')!;
+  const selLabel = document.getElementById('sel-label')!;
+  const evList = document.getElementById('events-list')!;
+
+  // Color picker
+  const cp = document.getElementById('color-picker')!;
+  COLORS.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'cswatch' + (c === selColor ? ' sel' : '');
+    s.style.background = c;
+    s.addEventListener('click', () => {
+      selColor = c;
+      cp.querySelectorAll('.cswatch').forEach(x => x.classList.remove('sel'));
+      s.classList.add('sel');
+    });
+    cp.appendChild(s);
+  });
 
   function getKey(y: number, m: number, d: number) {
-    return `${y}-${m}-${d}`;
+    return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   }
 
   function render() {
-    if (!calEl) return;
-    document.getElementById('month-label')!.textContent =
-      `${MONTHS[viewMonth]} ${viewYear}`;
+    document.getElementById('mlabel')!.textContent = `${MONTHS[vm]} ${vy}`;
     calEl.innerHTML = '';
+    const first = new Date(vy, vm, 1).getDay();
+    const dim = new Date(vy, vm + 1, 0).getDate();
 
-    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
-      const empty = document.createElement('div');
-      empty.className = 'day empty';
-      calEl.appendChild(empty);
+    for (let i = 0; i < first; i++) {
+      const e = document.createElement('div'); e.className = 'day empty'; calEl.appendChild(e);
     }
-
-    for (let d = 1; d <= daysInMonth; d++) {
+    for (let d = 1; d <= dim; d++) {
       const div = document.createElement('div');
       div.className = 'day';
-      const isToday = d === today.getDate()
-        && viewMonth === today.getMonth()
-        && viewYear === today.getFullYear();
+      const key = getKey(vy, vm, d);
+      const isToday = d === today.getDate() && vm === today.getMonth() && vy === today.getFullYear();
       if (isToday) div.classList.add('today');
+      if (selKey === key) div.classList.add('selected');
 
-      const numEl = document.createElement('div');
-      numEl.className = 'day-num';
-      numEl.textContent = String(d);
-      div.appendChild(numEl);
+      const num = document.createElement('div');
+      num.className = 'dnum'; num.textContent = String(d);
+      div.appendChild(num);
 
-      const key = getKey(viewYear, viewMonth, d);
-      (events[key] ?? []).slice(0, 2).forEach(t => {
-        const pill = document.createElement('div');
-        pill.className = 'task-pill';
-        pill.textContent = t;
-        div.appendChild(pill);
-      });
-      if ((events[key] ?? []).length > 2) {
-        const more = document.createElement('div');
-        more.style.cssText = 'font-size:10px;color:#888;';
-        more.textContent = `+${events[key].length - 2} más`;
-        div.appendChild(more);
-      }
-
-      div.addEventListener('click', () => openModal(viewYear, viewMonth, d));
+      if ((events[key] ?? []).length > 0) {
+  const dots = document.createElement('div');
+  dots.style.cssText = 'display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;';
+  (events[key] ?? []).slice(0, 5).forEach(ev => {
+    const dot = document.createElement('div');
+    dot.style.cssText = `width:6px;height:6px;border-radius:50%;background:${ev.color};flex-shrink:0;`;
+    dots.appendChild(dot);
+  });
+  div.appendChild(dots);
+}
+      div.addEventListener('click', () => selectDay(vy, vm, d));
       calEl.appendChild(div);
     }
   }
 
-  function openModal(y: number, m: number, d: number) {
-    selectedKey = getKey(y, m, d);
-    document.getElementById('modal-title')!.textContent =
-      `${d} de ${MONTHS[m]} ${y}`;
-    taskInput.value = '';
-    renderTasksList();
-    modalEl.classList.add('open');
-    setTimeout(() => taskInput.focus(), 50);
+  function selectDay(y: number, m: number, d: number) {
+    selKey = getKey(y, m, d);
+    selLabel.textContent = `${d} de ${MONTHS[m]} ${y}`;
+    render(); renderEventsList();
   }
 
-  function renderTasksList() {
-    const list = document.getElementById('tasks-list')!;
-    list.innerHTML = '';
-    (events[selectedKey!] ?? []).forEach((t, i) => {
-      const item = document.createElement('div');
-      item.className = 'task-item';
-      item.innerHTML = `<span>${t}</span><button data-i="${i}">✕</button>`;
-      item.querySelector('button')!.addEventListener('click', () => {
-        events[selectedKey!].splice(i, 1);
-        renderTasksList();
-        render();
-        modalEl.classList.add('open');
+  function renderEventsList() {
+    evList.innerHTML = '';
+    const evs = events[selKey!] ?? [];
+    if (!evs.length) { evList.innerHTML = '<div class="no-events">Sin eventos este día</div>'; return; }
+    evs.forEach((ev, i) => {
+      const c = document.createElement('div');
+      c.className = 'ecard'; c.style.background = ev.color;
+      const time = ev.start && ev.end ? `${ev.start} – ${ev.end}` : ev.start || '';
+      c.innerHTML = `<div class="ecard-name">${ev.name}</div><div class="ecard-meta">${ev.category}${time ? ' · ' + time : ''}</div><button class="ecard-del" title="Eliminar">✕</button>`;
+      c.querySelector<HTMLButtonElement>('.ecard-del')!.addEventListener('click', () => {
+        events[selKey!].splice(i, 1); render(); renderEventsList();
       });
-      list.appendChild(item);
+      evList.appendChild(c);
     });
   }
 
-  document.getElementById('save-btn')!.addEventListener('click', () => {
-    const val = taskInput.value.trim();
-    if (!val || !selectedKey) return;
-    if (!events[selectedKey]) events[selectedKey] = [];
-    events[selectedKey].push(val);
-    taskInput.value = '';
-    renderTasksList();
-    render();
-    modalEl.classList.add('open');
+  document.getElementById('add-btn')!.addEventListener('click', () => {
+    if (!selKey) return;
+    const name = (document.getElementById('f-name') as HTMLInputElement).value.trim();
+    if (!name) return;
+    if (!events[selKey]) events[selKey] = [];
+    events[selKey].push({
+      name,
+      category: (document.getElementById('f-cat') as HTMLSelectElement).value,
+      color: selColor,
+      start: (document.getElementById('f-start') as HTMLInputElement).value,
+      end: (document.getElementById('f-end') as HTMLInputElement).value,
+      desc: (document.getElementById('f-desc') as HTMLTextAreaElement).value.trim(),
+    });
+    (document.getElementById('f-name') as HTMLInputElement).value = '';
+    (document.getElementById('f-desc') as HTMLTextAreaElement).value = '';
+    (document.getElementById('f-start') as HTMLInputElement).value = '';
+    (document.getElementById('f-end') as HTMLInputElement).value = '';
+    render(); renderEventsList();
   });
 
-  taskInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('save-btn')!.click();
-  });
+  document.getElementById('prev')!.addEventListener('click', () => { vm--; if (vm < 0) { vm = 11; vy--; } render(); });
+  document.getElementById('next')!.addEventListener('click', () => { vm++; if (vm > 11) { vm = 0; vy++; } render(); });
 
-  document.getElementById('cancel-btn')!.addEventListener('click', () => {
-    modalEl.classList.remove('open');
-    selectedKey = null;
-  });
-
-  modalEl.addEventListener('click', e => {
-    if (e.target === modalEl) modalEl.classList.remove('open');
-  });
-
-  document.getElementById('prev')!.addEventListener('click', () => {
-    viewMonth--;
-    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-    render();
-  });
-  document.getElementById('next')!.addEventListener('click', () => {
-    viewMonth++;
-    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-    render();
-  });
-
-  const loggedUser = getLoggedUser();
-  if (loggedUser) {
-    showCalendar(loggedUser);
-  } else {
-    showLogin();
-  }
+  render();
+  evList.innerHTML = '<div class="no-events">Sin eventos este día</div>';
 </script>
