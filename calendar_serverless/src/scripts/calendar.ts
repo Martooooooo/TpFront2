@@ -428,6 +428,8 @@ async function authenticate(mode: 'login' | 'register') {
     : `Sesión iniciada como ${user.nombre}`;
   loginBtn.textContent = `Cerrar sesión (${user.nombre})`;
   loginBtn.dataset.loggedIn = 'true';
+  // Hide the register button when logged in
+  registerBtn.classList.add('hidden');
   closeLoginModal();
   setEventControlsEnabled(true);
   await loadEvents();
@@ -439,6 +441,8 @@ async function logout() {
   userStatus.textContent = 'Iniciá sesión para habilitar el calendario';
   loginBtn.textContent = 'Iniciar sesión';
   delete loginBtn.dataset.loggedIn;
+  // Show the register button when logged out
+  registerBtn.classList.remove('hidden');
   setEventControlsEnabled(false);
   eventsByDate = {};
   setUpcomingDrawerVisible(false);
@@ -469,6 +473,8 @@ async function restoreSession() {
   userStatus.textContent = `Sesión iniciada como ${storedUser.nombre}`;
   loginBtn.textContent = `Cerrar sesión (${storedUser.nombre})`;
   loginBtn.dataset.loggedIn = 'true';
+  // Hide the register button when restoring a session
+  registerBtn.classList.add('hidden');
   setEventControlsEnabled(true);
   await loadEvents();
 }
