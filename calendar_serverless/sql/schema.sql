@@ -1,0 +1,11 @@
+ALTER TABLE eventos
+ADD COLUMN IF NOT EXISTS fecha date;
+
+ALTER TABLE eventos
+ADD COLUMN IF NOT EXISTS hora_inicio time;
+
+ALTER TABLE eventos
+ADD COLUMN IF NOT EXISTS hora_fin time;
+
+ALTER TABLE eventos
+ALTER COLUMN tipo_eventos DROP IDENTITY IF EXISTS;

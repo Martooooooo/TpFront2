@@ -12,7 +12,10 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^10.1.2",
+    "@neondatabase/serverless": "^1.0.2",
     "astro": "^6.1.10"
+    ,"dotenv": "^16.6.1"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

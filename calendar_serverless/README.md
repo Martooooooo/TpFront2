@@ -41,3 +41,15 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## Base de datos Neon
+
+Para que el calendario guarde usuarios y eventos, creá un archivo `calendar_serverless/.env` con `DATABASE_URL=...` apuntando a tu Neon.
+
+Después ejecutá el SQL de [sql/schema.sql](sql/schema.sql) en el editor de Neon para agregar las columnas que usa el calendario (`fecha`, `hora_inicio` y `hora_fin`).
+
+Con eso, desde `calendar_serverless/` podés correr:
+
+```sh
+npm run dev
+```

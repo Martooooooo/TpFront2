@@ -9,6 +9,34 @@
     <title>Calendario</title>
   </head>
   <body>
+    <header class="topbar">
+      <div>
+        <div class="topbar-kicker">Calendario</div>
+        <div class="topbar-title">Organizá tus eventos</div>
+      </div>
+      <div class="auth-actions topbar-actions">
+        <button id="register-btn" class="ghost-btn" type="button">Registrarse</button>
+        <button id="login-btn" class="login-btn" type="button">Iniciar sesión</button>
+      </div>
+    </header>
+
+    <button id="drawer-toggle-btn" class="drawer-fab hidden" type="button" aria-expanded="false" aria-controls="upcoming-drawer">
+      Próximos eventos
+    </button>
+
+    <div class="drawer-overlay hidden" id="drawer-overlay"></div>
+
+    <aside class="upcoming-drawer hidden" id="upcoming-drawer" aria-label="Próximos eventos">
+      <div class="drawer-head">
+        <div>
+          <div class="drawer-title">Próximos eventos</div>
+          <div class="drawer-subtitle" id="drawer-count">0 eventos</div>
+        </div>
+        <button id="close-drawer-btn" class="drawer-close" type="button" aria-label="Cerrar panel">×</button>
+      </div>
+      <div class="drawer-body" id="drawer-list"></div>
+    </aside>
+
     <div class="app">
       <div class="cal-side">
         <div class="nav">
@@ -25,7 +53,13 @@
       </div>
 
       <div class="panel">
-        <div class="panel-title">Nuevo evento</div>
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Nuevo evento</div>
+            <div class="sel-label" id="user-status">Iniciá sesión para habilitar el calendario</div>
+          </div>
+        </div>
+
         <div class="sel-label" id="sel-label">Hacé clic en un día para seleccionarlo</div>
 
         <div class="field">
@@ -35,10 +69,10 @@
         <div class="field">
           <label>Categoría</label>
           <select id="f-cat">
-            <option value="trabajo">Trabajo</option>
-            <option value="escuela">Escuela</option>
-            <option value="personal">Personal</option>
-            <option value="entretenimiento">Entretenimiento</option>
+            <option value="1">Trabajo</option>
+            <option value="2">Escuela</option>
+            <option value="3">Personal</option>
+            <option value="4">Entretenimiento</option>
           </select>
         </div>
         <div class="field">
@@ -58,6 +92,27 @@
         </div>
         <button id="add-btn">+ Agregar evento</button>
         <div class="events-list" id="events-list"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="login-modal">
+      <div class="modal">
+        <div class="modal-title" id="auth-title">Cuenta</div>
+        <div class="modal-text" id="auth-text">Registrate si no tenés cuenta o iniciá sesión si ya la creaste.</div>
+        <div class="field">
+          <label>Usuario</label>
+          <input type="text" id="login-name" placeholder="Tu nombre" />
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" placeholder="Tu contraseña" />
+        </div>
+        <div class="modal-status" id="login-status"></div>
+        <div class="modal-actions">
+          <button id="submit-register-btn" type="button" class="secondary-btn">Registrarme</button>
+          <button id="close-login-btn" type="button" class="secondary-btn">Cancelar</button>
+          <button id="submit-login-btn" type="button" class="primary-btn">Entrar</button>
+        </div>
       </div>
     </div>
   </body>
@@ -80,6 +135,38 @@
     max-width: 900px;
     margin: 0 auto;
     align-items: start;
+  }
+
+  .topbar {
+    max-width: 900px;
+    margin: 0 auto 1rem;
+    padding: .9rem 1rem;
+    border: 1px solid #e5e5e3;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .topbar-kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: #6b7280;
+    font-weight: 800;
+  }
+
+  .topbar-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 2px;
+  }
+
+  .topbar-actions {
+    flex-wrap: nowrap;
   }
 
   /* — nav — */
@@ -125,10 +212,209 @@
     background: #fff; border: 1px solid #e5e5e3; border-radius: 12px;
     padding: 1rem; position: sticky; top: 1.5rem;
   }
-  .panel-title { font-size: 14px; font-weight: 500; margin-bottom: .75rem; }
+
+  .drawer-fab {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 44;
+    border: 1px solid #c7d8ea;
+    border-left: 0;
+    border-radius: 0 14px 14px 0;
+    background: #185FA5;
+    color: #fff;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    box-shadow: 0 12px 24px rgba(24, 95, 165, .22);
+    cursor: pointer;
+  }
+
+  .drawer-fab.hidden,
+  .upcoming-drawer.hidden {
+    display: none;
+  }
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .28);
+    z-index: 45;
+  }
+
+  .upcoming-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(360px, 88vw);
+    height: 100vh;
+    background: #fff;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 16px 0 40px rgba(15, 23, 42, .15);
+    z-index: 46;
+    transform: translateX(-102%);
+    transition: transform .2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .upcoming-drawer.open {
+    transform: translateX(0);
+  }
+
+  .drawer-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 1rem 1rem .75rem;
+    border-bottom: 1px solid #eef2f7;
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  }
+
+  .drawer-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .drawer-subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .drawer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid #dbe5f0;
+    background: #fff;
+    color: #334155;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .drawer-body {
+    padding: .9rem;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drawer-empty {
+    padding: 1rem;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px dashed #d8e2ee;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .drawer-event {
+    border-radius: 14px;
+    border: 1px solid #e5ecf5;
+    padding: .85rem .9rem;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+  }
+
+  .drawer-event-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .drawer-event-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .drawer-event-date {
+    font-size: 12px;
+    color: #334155;
+    margin-top: 3px;
+  }
+
+  .drawer-event-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: #185FA5;
+    white-space: nowrap;
+  }
+
+  .drawer-event-desc {
+    margin-top: .5rem;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.45;
+  }
+
+  .drawer-event-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: .6rem;
+    padding: .28rem .55rem;
+    border-radius: 999px;
+    background: #f8fbff;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .drawer-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: .75rem;
+  }
+  .panel-title { font-size: 14px; font-weight: 500; margin-bottom: .2rem; }
   .sel-label {
     font-size: 11px; color: #666; margin-bottom: .6rem;
     padding: .35rem .5rem; background: #f5f5f3; border-radius: 6px;
+  }
+  .login-btn {
+    background: #111827;
+    color: #fff;
+    border: 1px solid #111827;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .auth-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .ghost-btn {
+    background: #fff;
+    color: #185FA5;
+    border: 1px solid #cfe0f3;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
   }
 
   /* — form fields — */
@@ -165,6 +451,18 @@
   }
   #add-btn:hover { opacity: .85; }
 
+  #add-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+
+  .field input:disabled,
+  .field select:disabled,
+  .field textarea:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+
   /* — events list in panel — */
   .events-list {
     margin-top: .75rem; border-top: 1px solid #eee; padding-top: .75rem;
@@ -182,132 +480,92 @@
   .ecard-del:hover { color: #fff; }
   .no-events { font-size: 12px; color: #888; text-align: center; padding: .5rem 0; }
 
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.35);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    z-index: 50;
+  }
+
+  .hidden { display: none; }
+
+  .modal {
+    width: min(100%, 360px);
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.14);
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: .25rem;
+  }
+
+  .modal-text {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: .8rem;
+  }
+
+  .modal-status {
+    min-height: 16px;
+    font-size: 12px;
+    color: #b91c1c;
+    margin-top: -.15rem;
+    margin-bottom: .5rem;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: .75rem;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .primary-btn {
+    background: #185FA5;
+    color: #fff;
+    border: 1px solid #185FA5;
+  }
+
+  .secondary-btn {
+    background: #f3f4f6;
+    color: #111827;
+    border: 1px solid #d1d5db;
+  }
+
   @media (max-width: 640px) {
+    .topbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
     .app { grid-template-columns: 1fr; }
     .panel { position: static; }
+    .drawer-fab {
+      top: auto;
+      bottom: 16px;
+      transform: none;
+      border-radius: 0 14px 14px 0;
+    }
   }
 </style>
 
 <script>
-  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const COLORS = ['#E24B4A','#D85A30','#BA7517','#639922',
-    '#1D9E75','#185FA5','#7F77DD','#D4537E','#888780'];
-
-  interface Event {
-    name: string; category: string; color: string;
-    start: string; end: string; desc: string;
-  }
-
-  const today = new Date();
-  let vy = today.getFullYear(), vm = today.getMonth();
-  let events: Record<string, Event[]> = {};
-  let selKey: string | null = null;
-  let selColor = COLORS[5];
-
-  const calEl = document.getElementById('cal')!;
-  const selLabel = document.getElementById('sel-label')!;
-  const evList = document.getElementById('events-list')!;
-
-  // Color picker
-  const cp = document.getElementById('color-picker')!;
-  COLORS.forEach(c => {
-    const s = document.createElement('div');
-    s.className = 'cswatch' + (c === selColor ? ' sel' : '');
-    s.style.background = c;
-    s.addEventListener('click', () => {
-      selColor = c;
-      cp.querySelectorAll('.cswatch').forEach(x => x.classList.remove('sel'));
-      s.classList.add('sel');
-    });
-    cp.appendChild(s);
-  });
-
-  function getKey(y: number, m: number, d: number) {
-    return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  }
-
-  function render() {
-    document.getElementById('mlabel')!.textContent = `${MONTHS[vm]} ${vy}`;
-    calEl.innerHTML = '';
-    const first = new Date(vy, vm, 1).getDay();
-    const dim = new Date(vy, vm + 1, 0).getDate();
-
-    for (let i = 0; i < first; i++) {
-      const e = document.createElement('div'); e.className = 'day empty'; calEl.appendChild(e);
-    }
-    for (let d = 1; d <= dim; d++) {
-      const div = document.createElement('div');
-      div.className = 'day';
-      const key = getKey(vy, vm, d);
-      const isToday = d === today.getDate() && vm === today.getMonth() && vy === today.getFullYear();
-      if (isToday) div.classList.add('today');
-      if (selKey === key) div.classList.add('selected');
-
-      const num = document.createElement('div');
-      num.className = 'dnum'; num.textContent = String(d);
-      div.appendChild(num);
-
-      if ((events[key] ?? []).length > 0) {
-  const dots = document.createElement('div');
-  dots.style.cssText = 'display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;';
-  (events[key] ?? []).slice(0, 5).forEach(ev => {
-    const dot = document.createElement('div');
-    dot.style.cssText = `width:6px;height:6px;border-radius:50%;background:${ev.color};flex-shrink:0;`;
-    dots.appendChild(dot);
-  });
-  div.appendChild(dots);
-}
-      div.addEventListener('click', () => selectDay(vy, vm, d));
-      calEl.appendChild(div);
-    }
-  }
-
-  function selectDay(y: number, m: number, d: number) {
-    selKey = getKey(y, m, d);
-    selLabel.textContent = `${d} de ${MONTHS[m]} ${y}`;
-    render(); renderEventsList();
-  }
-
-  function renderEventsList() {
-    evList.innerHTML = '';
-    const evs = events[selKey!] ?? [];
-    if (!evs.length) { evList.innerHTML = '<div class="no-events">Sin eventos este día</div>'; return; }
-    evs.forEach((ev, i) => {
-      const c = document.createElement('div');
-      c.className = 'ecard'; c.style.background = ev.color;
-      const time = ev.start && ev.end ? `${ev.start} – ${ev.end}` : ev.start || '';
-      c.innerHTML = `<div class="ecard-name">${ev.name}</div><div class="ecard-meta">${ev.category}${time ? ' · ' + time : ''}</div><button class="ecard-del" title="Eliminar">✕</button>`;
-      c.querySelector<HTMLButtonElement>('.ecard-del')!.addEventListener('click', () => {
-        events[selKey!].splice(i, 1); render(); renderEventsList();
-      });
-      evList.appendChild(c);
-    });
-  }
-
-  document.getElementById('add-btn')!.addEventListener('click', () => {
-    if (!selKey) return;
-    const name = (document.getElementById('f-name') as HTMLInputElement).value.trim();
-    if (!name) return;
-    if (!events[selKey]) events[selKey] = [];
-    events[selKey].push({
-      name,
-      category: (document.getElementById('f-cat') as HTMLSelectElement).value,
-      color: selColor,
-      start: (document.getElementById('f-start') as HTMLInputElement).value,
-      end: (document.getElementById('f-end') as HTMLInputElement).value,
-      desc: (document.getElementById('f-desc') as HTMLTextAreaElement).value.trim(),
-    });
-    (document.getElementById('f-name') as HTMLInputElement).value = '';
-    (document.getElementById('f-desc') as HTMLTextAreaElement).value = '';
-    (document.getElementById('f-start') as HTMLInputElement).value = '';
-    (document.getElementById('f-end') as HTMLInputElement).value = '';
-    render(); renderEventsList();
-  });
-
-  document.getElementById('prev')!.addEventListener('click', () => { vm--; if (vm < 0) { vm = 11; vy--; } render(); });
-  document.getElementById('next')!.addEventListener('click', () => { vm++; if (vm > 11) { vm = 0; vy++; } render(); });
-
-  render();
-  evList.innerHTML = '<div class="no-events">Sin eventos este día</div>';
+  import '../scripts/calendar';
 </script>
