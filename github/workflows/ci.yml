@@ -1,0 +1,40 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar dependencias
+        run: npm install
+        working-directory: calendar_serverless
+
+      - name: Correr tests unitarios
+        run: npm test
+        working-directory: calendar_serverless
+
+      - name: Instalar Playwright
+        run: npx playwright install chromium
+        working-directory: calendar_serverless
+
+      - name: Correr tests E2E
+        run: npm run test:e2e
+        working-directory: calendar_serverless
+
+      - name: Build
+        run: npm run build
+        working-directory: calendar_serverless
