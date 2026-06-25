@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "lint": "eslint src",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
@@ -22,8 +23,10 @@
   },
   "devDependencies": {
     "@astrojs/vercel": "^10.0.8",
+    "@eslint/js": "^9.0.0",
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.1",
+    "eslint": "^9.0.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.9"
   }
